@@ -1,5 +1,5 @@
 const express = require("express");
-const { User } = require("../db");
+const { User, Account } = require("../db");
 const userRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const { secretKey } = require("../config");
@@ -12,7 +12,7 @@ const {
 } = require("../middleware/user");
 
 const signupSchema = zod.object({
-  name: zod.string().email(),
+  name: zod.string(),
   email: zod.string(),
   password: zod.string(),
 });
@@ -46,6 +46,11 @@ userRouter.post("/signup", async (req, res) => {
     email,
     name,
     password_hash: passwordHash,
+  });
+
+  await Account.create({
+    userId: user._id,
+    balance: 100 + Math.round(Math.random() * 10000),
   });
 
   const token = jwt.sign(
@@ -113,7 +118,7 @@ const updateSchema = zod.object({
   password: zod.string().optional(),
 });
 
-userRouter.post("/update", userMiddleWare, async (req, res) => {
+userRouter.put("/update", userMiddleWare, async (req, res) => {
   const userId = req.body.userId;
 
   const { success } = updateSchema.safeParse(req.body);
@@ -143,16 +148,22 @@ userRouter.post("/update", userMiddleWare, async (req, res) => {
 });
 
 userRouter.get("/bulk", userMiddleWare, async (req, res) => {
-  const filterQuery = req.query.filter;
+  const filterQuery = req.query.filter || "";
 
-  const users = !!filterQuery
-    ? await User.find({
-        name: filterQuery,
-      })
-    : await User.find();
+  const users = await User.find({
+    name: {
+      $regex: filterQuery, // to search string that has the filterQuery substring
+      $options: "i", // case insensitive search
+    },
+  });
 
   return res.status(200).json({
-    data: users,
+    data: users.map((user) => {
+      return {
+        name: user.name,
+        email: user.email,
+      };
+    }),
   });
 });
 
