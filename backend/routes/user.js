@@ -160,10 +160,52 @@ userRouter.get("/bulk", userMiddleWare, async (req, res) => {
   return res.status(200).json({
     data: users.map((user) => {
       return {
+        id: user._id,
         name: user.name,
         email: user.email,
       };
     }),
+  });
+});
+
+userRouter.get("/one/:userId", userMiddleWare, async (req, res) => {
+  const userId = req.params.userId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  return res.status(200).json({
+    name: user.name,
+    email: user.email,
+    id: user._id,
+  });
+});
+
+userRouter.get("/me", userMiddleWare, async (req, res) => {
+  const userId = req.body.userId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  const userAccount = await Account.findOne({
+    userId,
+  });
+
+  if (!userAccount) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+
+  return res.status(200).json({
+    name: user.name,
+    email: user.email,
+    id: user._id,
+    balance: userAccount.balance,
   });
 });
 

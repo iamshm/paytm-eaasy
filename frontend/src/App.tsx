@@ -1,41 +1,33 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import useIsAuthenticated from "./hooks/use-isAuthenticated";
+import useAuthentication from "./hooks/use-authenticated";
 import Dashboard from "./pages/Dashboard";
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
-import PageTemplate from "./components/PageTemplate";
+import RequireAuth from "./components/RequireAuth";
+import Send from "./pages/Send";
+import AntiAuth from "./components/AntiAuth";
 
 const App = () => {
-  const isAuthenticated = useIsAuthenticated();
+  const { hasToken } = useAuthentication();
 
   return (
     <Routes>
       <Route
         path="/"
-        element={<Navigate to={isAuthenticated ? "/dashboard" : "/signin"} />}
+        element={<Navigate to={hasToken ? "/dashboard" : "/signin"} />}
       />
 
-      <Route path="/signup" element={<Signup />} />
+      <Route element={<AntiAuth />}>
+        <Route path="/signup" element={<Signup />} />
 
-      <Route path="/signin" element={<Signin />} />
+        <Route path="/signin" element={<Signin />} />
+      </Route>
 
-      <Route
-        path="/dashboard"
-        element={
-          <PageTemplate>
-            <Dashboard />
-          </PageTemplate>
-        }
-      />
+      <Route element={<RequireAuth />}>
+        <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route
-        path="/send"
-        element={
-          <PageTemplate>
-            <div>Send</div>
-          </PageTemplate>
-        }
-      />
+        <Route path="/send/:toUserId" element={<Send />} />
+      </Route>
     </Routes>
   );
 };
