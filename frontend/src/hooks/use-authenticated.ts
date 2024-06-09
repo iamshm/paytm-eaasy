@@ -6,7 +6,7 @@ const useAuthentication = () => {
   const logout = () => {
     deleteAuthorizationToken();
 
-    window.location.reload();
+    window.location.replace("/");
   };
 
   return {

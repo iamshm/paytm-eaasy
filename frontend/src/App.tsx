@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import RequireAuth from "./components/RequireAuth";
 import Send from "./pages/Send";
 import AntiAuth from "./components/AntiAuth";
+import UserContextProvider from "./context/User";
 
 const App = () => {
   const { hasToken } = useAuthentication();
@@ -24,9 +25,23 @@ const App = () => {
       </Route>
 
       <Route element={<RequireAuth />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <UserContextProvider>
+              <Dashboard />
+            </UserContextProvider>
+          }
+        />
 
-        <Route path="/send/:toUserId" element={<Send />} />
+        <Route
+          path="/send/:toUserId"
+          element={
+            <UserContextProvider>
+              <Send />
+            </UserContextProvider>
+          }
+        />
       </Route>
     </Routes>
   );

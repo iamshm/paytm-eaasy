@@ -3,8 +3,8 @@ import fetchUsers from "../apis/fetch-users";
 import PageLayout from "../components/PageLayout";
 import UserAvatar from "../components/UserAvatar";
 import Button from "../components/Button";
-import fetchMe from "../apis/fetch-me";
 import { useNavigate } from "react-router-dom";
+import { useUserContext } from "../context/User";
 
 interface User {
   id: string;
@@ -17,24 +17,16 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  const [me, setMe] = useState<{
-    id: string;
-    name: string;
-    email: string;
-    balance: number;
-  }>();
+  const me = useUserContext();
+
   const [usersList, setUsersList] = useState<User[]>([]);
 
   const onFetchUsers = async () => {
-    const resMe = await fetchMe();
-
-    setMe(resMe);
-
     const res = await fetchUsers();
 
     const users = res.data as User[];
 
-    const filteredUsers = users.filter((user) => user.id !== resMe?.id);
+    const filteredUsers = users.filter((user) => user.id !== me?.id);
 
     setUsersList(filteredUsers);
   };
